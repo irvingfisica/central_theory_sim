@@ -36,7 +36,6 @@ impl<'a> Celda<'a> {
                 self.actividades.insert(sector_cve,actividad);
             }
         }
-
     }
 
     pub fn distance(&self, other: &Celda) -> f64 {
@@ -154,14 +153,13 @@ impl<'a> Economy<Celda<'a>> for HashMap<String, Celda<'a>> {
             let denom: f64 = self.iter().filter_map(|(_, cell)| {
                 match &cell.actividades.is_empty() {
                     true => None,
-                false => match &cell.actividades.get(&sector.cve) {
-                    Some(activcxy) => {
-                        
-                        Some(activcxy.size * cell.distance(cellxy).powf(-1.0 * sector.interaction))
-                    },
-                    None => None
+                    false => match &cell.actividades.get(&sector.cve) {
+                        Some(activcxy) => {
+                            Some(activcxy.size * cell.distance(cellxy).powf(-1.0 * sector.interaction))
+                        },
+                        None => None
+                    }
                 }
-            }
             }).sum();
 
             let flux = numer/denom;
@@ -171,9 +169,6 @@ impl<'a> Economy<Celda<'a>> for HashMap<String, Celda<'a>> {
 
         }).sum();
 
-    
-
-        
         Ok(revenue * sector.p_capita_expenditure)
     }
 
@@ -201,8 +196,10 @@ impl<'a> Economy<Celda<'a>> for HashMap<String, Celda<'a>> {
             None => return Err(From::from("La celda no tiene actividad para ese sector"))
         };
 
-        let margen = self.member_revenue(&celda, &sector)? - self.member_cost(&celda, &sector)?;
-        let size = actividad.size + actividad.growth_factor * margen;
+        let revenue = self.member_revenue(&celda, &sector)?;
+        let cost = self.member_cost(&celda, &sector)?;
+        let margen = revenue - cost;
+        let size = actividad.size + (actividad.growth_factor * margen);
 
         Ok(size)
         
@@ -212,7 +209,8 @@ impl<'a> Economy<Celda<'a>> for HashMap<String, Celda<'a>> {
 
         let mut mapa = HashMap::new();
 
-        for (cve, cell) in self.iter().filter(|(_, cell)| cell.actividades.get(&sector.cve).is_some()) {
+        for (cve, cell) in self.iter()
+            .filter(|(_, cell)| cell.actividades.get(&sector.cve).is_some()) {
             
             match self.member_size(cell, sector) {
                 Ok(size) => {
@@ -230,7 +228,9 @@ impl<'a> Economy<Celda<'a>> for HashMap<String, Celda<'a>> {
 
     fn update_populations(&mut self) {
         
-        for (_, celda) in self.iter_mut() {
+        for (_, celda) in self.iter_mut().filter(|(_, cell)| {
+            !cell.actividades.is_empty()
+        }) {
             celda.poblacion = celda.actividades.iter().map(|(_, actividad)| {
                     let size = actividad.size();
                     let sector = actividad.get_sector();

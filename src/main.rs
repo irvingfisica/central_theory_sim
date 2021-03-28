@@ -6,8 +6,8 @@ use std::process;
 use std::collections::HashMap;
 
 use rand::prelude::*;
-use easytiming::Timing;
-use std::io::Stdout;
+// use easytiming::Timing;
+// use std::io::Stdout;
 
 use centros::Economy;
 use centros::{Sector, Celda};
@@ -62,16 +62,17 @@ fn run() -> Result<(), Box<dyn Error>> {
         println!("cve: {}, poblacion: {}, size: {}", cve, pop, size);
     }
 
-    for t in 0..ITERACIONES {{
-        let _t : easytiming::Timing<'_, Stdout>  = Timing::new("test() function");
+    for t in 0..ITERACIONES {
+        {
+        // let _t : easytiming::Timing<'_, Stdout>  = Timing::new("test() function");
         if t % 50 == 0 {
             println!("t = {}", t)
         }
 
         celdas.evolve(&sectores);
+        }
     }
-    }
-    
+
     for cve in cves.iter() {
         let size = celdas.get(cve).unwrap().size_of_activity(&sector).unwrap();
         let pop = celdas.get(cve).unwrap().population();
