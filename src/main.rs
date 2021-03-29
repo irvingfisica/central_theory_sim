@@ -41,6 +41,8 @@ fn run() -> Result<(), Box<dyn Error>> {
         utilities::escribir_iteracion(&mut salida,&celdas)?;
     }
 
+    utilities::flush_salida(&mut salida)?;
+
     Ok(())
 }
 

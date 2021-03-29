@@ -90,6 +90,12 @@ impl<'a> SalidaSector<'a> {
 
         Ok(())
     }
+
+    pub fn flush_writer(&mut self) -> Result<(), Box<dyn Error>> {
+        self.writer.flush()?;
+
+        Ok(())
+    }
 }
 
 pub fn get_salida<'a>(sectores: &'a HashMap<String, Sector>, celdas: &HashMap<String, Celda>, directorio: &str) 
@@ -118,4 +124,13 @@ pub fn escribir_iteracion(salida: &mut HashMap<String, SalidaSector>, celdas: &H
         };
 
         Ok(())
-    } 
+    }
+    
+pub fn flush_salida(salida: &mut HashMap<String, SalidaSector>) -> Result<(), Box<dyn Error>> {
+
+    for (_, salida_sector) in salida {
+        salida_sector.flush_writer()?;
+    };
+
+    Ok(())
+}
