@@ -134,3 +134,23 @@ pub fn flush_salida(salida: &mut HashMap<String, SalidaSector>) -> Result<(), Bo
 
     Ok(())
 }
+
+pub fn escribir_topologia(celdas: &HashMap<String, Celda>, ruta: &str) -> Result<(), Box<dyn Error>> {
+    let mut wtr_cells = csv::Writer::from_path(ruta)?;
+
+    wtr_cells.write_record(&["CVE", "x", "y", "poblacion"])?;
+
+    for (_,cell) in celdas.iter() {
+        let coords = cell.coordinates();
+        wtr_cells.write_record(&[
+            &cell.cve(), 
+            &coords.0.to_string(), 
+            &coords.1.to_string(), 
+            &cell.population().to_string()
+        ])?;
+    };
+
+    wtr_cells.flush()?;
+
+    Ok(())
+}

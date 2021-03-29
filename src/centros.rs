@@ -52,6 +52,14 @@ impl<'a> Celda<'a> {
         self.poblacion 
     }
 
+    pub fn coordinates(&self) -> (f64, f64) {
+        (self.x, self.y) 
+    }
+
+    pub fn cve(&self) -> String {
+        self.cve.to_owned() 
+    }
+
     pub fn size_of_activity(&self, sector: &'a Sector) -> Result<f64, Box<dyn Error>> {
 
         match self.actividades.get(&sector.cve) {
@@ -113,10 +121,6 @@ impl Sector {
             interaction: interaction,
             ..Default::default()
         }
-    }
-
-    pub fn cve(&self) -> String {
-        self.cve.to_owned()
     }
 }
 
