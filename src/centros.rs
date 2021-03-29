@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::error::Error;
 
-
 pub struct Celda<'a> {
     cve: String,
     x: f64,
