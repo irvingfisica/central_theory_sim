@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use crate::centros::{Sector, Celda};
+use std::fs::File;
+use std::error::Error;
 
 pub fn sectors_from_vec(sectores: Vec<(&str, f64)>) -> HashMap<String, Sector> {
     let mut mapa = HashMap::new();
@@ -30,7 +32,7 @@ pub fn grid_of_cells<'a>(x_max: usize, y_max: usize, population: f64) -> HashMap
     celdas
 }
 
-pub fn define_centers<'a>(centros: usize, celdas: &mut HashMap<String,Celda<'a>>, sector: &'a Sector) -> Vec<String> {
+pub fn define_random_centers<'a>(centros: usize, celdas: &mut HashMap<String,Celda<'a>>, sector: &'a Sector) -> Vec<String> {
     use rand::prelude::*;
 
     let mut rng = &mut rand::thread_rng();
@@ -48,3 +50,72 @@ pub fn define_centers<'a>(centros: usize, celdas: &mut HashMap<String,Celda<'a>>
 
     cves
 }
+
+pub struct SalidaSector<'a> {
+    sector: &'a Sector,
+    centros: Vec<String>,
+    writer: csv::Writer<File>,
+}
+
+impl<'a> SalidaSector<'a> {
+    pub fn get_salida_sector(sector: &'a Sector, celdas: &HashMap<String, Celda>, ruta: &str) -> Result<SalidaSector<'a>,Box<dyn Error>> {
+
+        let cves: Vec<String> = celdas.iter().filter_map(|(cve, celda)| {
+            match celda.get_activity(&sector) {
+                Some(_) => Some(cve.to_owned()),
+                _ => None
+            }
+        }).collect();
+    
+        let writer = csv::Writer::from_path(ruta)?;
+    
+        let mut salida = SalidaSector {
+            sector: sector,
+            centros: cves,
+            writer: writer,
+        };
+    
+        salida.writer.write_record(&salida.centros)?;
+    
+        Ok(salida)
+    }
+
+    pub fn escribir_registro(&mut self, celdas: &HashMap<String, Celda>) -> Result<(), Box<dyn Error>> {
+
+        let sizes: Vec<String> = self.centros.iter().map(|centro| {
+            celdas.get(centro).unwrap().size_of_activity(self.sector).unwrap().to_string()
+        }).collect();
+
+        self.writer.write_record(&sizes)?;
+
+        Ok(())
+    }
+}
+
+pub fn get_salida<'a>(sectores: &'a HashMap<String, Sector>, celdas: &HashMap<String, Celda>, directorio: &str) 
+    -> Result<HashMap<String, SalidaSector<'a>>, Box<dyn Error>> {
+
+        let mut salida = HashMap::new();
+
+        for (cve,sector) in sectores {
+
+            let mut ruta = String::from(directorio);
+            ruta.push_str(&cve);
+            ruta.push_str(".csv");
+
+            salida.insert(cve.to_owned(),SalidaSector::get_salida_sector(sector, celdas, &ruta)?);
+
+        };
+
+        Ok(salida)
+}
+
+pub fn escribir_iteracion(salida: &mut HashMap<String, SalidaSector>, celdas: &HashMap<String, Celda>) 
+    -> Result<(), Box<dyn Error>> {
+
+        for (_, salida_sector) in salida {
+            salida_sector.escribir_registro(celdas)?;
+        };
+
+        Ok(())
+    } 

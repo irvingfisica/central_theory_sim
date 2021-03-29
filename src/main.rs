@@ -3,11 +3,8 @@ mod utilities;
 
 use std::error::Error;
 use std::process;
-// use std::fs::File;
-use std::collections::HashMap;
 
 use centros::Economy;
-use centros::{Sector, Celda};
 
 fn main() {
 
@@ -30,8 +27,10 @@ fn run() -> Result<(), Box<dyn Error>> {
     let sector = sectores.get("sector_1").ok_or("El sector no existe")?;
 
     let mut celdas = utilities::grid_of_cells(X_MAX, Y_MAX, POBLACION);
+    utilities::define_random_centers(CENTROS, &mut celdas, sector);
 
-    let _cves = utilities::define_centers(CENTROS, &mut celdas, sector);
+    let directorio = "./salida/";
+    let mut salida = utilities::get_salida(&sectores, &celdas, directorio)?;
 
     for t in 0..ITERACIONES {
         if t % 50 == 0 {
@@ -39,6 +38,7 @@ fn run() -> Result<(), Box<dyn Error>> {
         }
 
         celdas.evolve(&sectores);
+        utilities::escribir_iteracion(&mut salida,&celdas)?;
     }
 
     Ok(())

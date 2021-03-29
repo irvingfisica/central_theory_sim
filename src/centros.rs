@@ -61,6 +61,15 @@ impl<'a> Celda<'a> {
             None => return Err(From::from("La celda no tiene actividad para ese sector"))
         }
     }
+
+    pub fn get_activity(&self, sector: &'a Sector) -> Option<&'a Actividad> {
+        match self.actividades.get(&sector.cve) {
+            Some(actividad) => {
+                Some(actividad)
+            },
+            None => None
+        }
+    }
 }
 
 pub struct Actividad<'a> {
@@ -104,6 +113,10 @@ impl Sector {
             interaction: interaction,
             ..Default::default()
         }
+    }
+
+    pub fn cve(&self) -> String {
+        self.cve.to_owned()
     }
 }
 
