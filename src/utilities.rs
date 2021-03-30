@@ -63,6 +63,42 @@ pub fn topo_from_file<'a>(path: &str) -> Result<HashMap<String, Celda<'a>>,Box<d
 
 }
 
+pub fn centers_from_file<'a>(path: &str, celdas: &mut HashMap<String,Celda<'a>>, sector: &'a Sector) -> Result<Vec<String>,Box<dyn Error>> {
+
+    let mut rdr = csv::Reader::from_path(path)?;
+    let mut salida = Vec::new();
+
+    let growth_factor = 0.5;
+
+    // let mut cta = 0;
+    for result in rdr.records() {
+        let record = result?;
+        
+        let cve = &record[0];
+        let size = match record[1].parse::<f64>() {
+            Ok(x) => x,
+            _ => continue,
+        };
+
+        match celdas.get_mut(cve) {
+            Some(celda) => {
+                celda.add_activity(sector, size, growth_factor);
+                salida.push(cve.to_owned());
+                // cta = cta + 1;
+            },
+            None => continue
+        };
+
+        // if cta >= 20 {
+        //     break
+        // }
+
+    }
+
+    Ok(salida)
+
+}
+
 pub fn define_random_centers<'a>(centros: usize, celdas: &mut HashMap<String,Celda<'a>>, sector: &'a Sector) -> Vec<String> {
     use rand::prelude::*;
 

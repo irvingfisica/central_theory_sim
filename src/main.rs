@@ -15,16 +15,15 @@ fn main() {
 }
 
 fn agebs() -> Result<(), Box<dyn Error>> {
-    const CENTROS: usize = 20;
     const ITERACIONES: usize = 200;
 
     let mut celdas = utilities::topo_from_file("./datos/procesados/agebs_cdmx_pob.csv")?;
 
-    let proto_sectores = vec![("sector_ag_1",1.0),("sector_ag_3",3.0)];
+    let proto_sectores = vec![("cemp_mpio_3",3.0)];
     let sectores = utilities::sectors_from_vec(proto_sectores);
-    for (_, sector) in sectores.iter() {
-        utilities::define_random_centers(CENTROS, &mut celdas, sector);
-    }
+    let sector = sectores.get("cemp_mpio_3").expect("El sector no existe");
+
+    utilities::centers_from_file("./datos/procesados/cemp_cdmx.csv", &mut celdas, sector)?;
     
     utilities::escribir_topologia(&celdas, "./salida/celdas_agebs.csv")?;
 
