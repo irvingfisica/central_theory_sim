@@ -32,6 +32,37 @@ pub fn grid_of_cells<'a>(x_max: usize, y_max: usize, population: f64) -> HashMap
     celdas
 }
 
+pub fn topo_from_file<'a>(path: &str) -> Result<HashMap<String, Celda<'a>>,Box<dyn Error>> {
+
+    let mut celdas: HashMap<String, Celda> = HashMap::new();
+
+    let mut rdr = csv::Reader::from_path(path)?;
+
+    for result in rdr.records() {
+        let record = result?;
+        
+        let cve = &record[0];
+        let x = match record[1].parse::<f64>() {
+            Ok(x) => x,
+            _ => continue,
+        };
+        let y = match record[2].parse::<f64>() {
+            Ok(x) => x,
+            _ => continue,
+        };
+        let pob = match record[3].parse::<f64>() {
+            Ok(x) => x,
+            _ => continue,
+        };
+
+        let celda = Celda::new(&cve, x, y, pob);
+        celdas.insert(cve.to_owned(),celda);
+    }
+
+    Ok(celdas)
+
+}
+
 pub fn define_random_centers<'a>(centros: usize, celdas: &mut HashMap<String,Celda<'a>>, sector: &'a Sector) -> Vec<String> {
     use rand::prelude::*;
 
