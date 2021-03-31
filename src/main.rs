@@ -4,8 +4,8 @@ mod utilities;
 use std::error::Error;
 use std::process;
 
-use easytiming::Timing;
-use std::io::Stdout;
+// use easytiming::Timing;
+// use std::io::Stdout;
 
 use centros::Economy;
 
@@ -23,23 +23,17 @@ fn agebs() -> Result<(), Box<dyn Error>> {
     let mut celdas = utilities::topo_from_file("./datos/procesados/agebs_cdmx_pob.csv")?;
 
     let proto_sectores = vec![
-            ("cm_0p50",0.5),
-            ("cm_0p75",0.75),
-            ("cm_1p00",1.0),
-            ("cm_1p25",1.25),
-            ("cm_1p50",1.5),
-            ("cm_1p75",1.75),
-            ("cm_2p00",2.0),
-            ("cm_2p25",2.25),
-            ("cm_2p50",2.5),
-            ("cm_2p75",2.75),
+            ("rs_1p00",1.0),
+            ("rs_1p50",1.5),
+            ("rs_2p00",2.0),
+            ("rs_2p75",2.75),
         ];
 
     let sectores = utilities::sectors_from_vec(proto_sectores);
     // let sector = sectores.get("cemp_mpio_3").expect("El sector no existe");
 
     for (_,sector) in sectores.iter() {
-        utilities::centers_from_file("./datos/procesados/cemp_cdmx.csv", &mut celdas, sector)?;
+        utilities::centers_from_file("./datos/procesados/rests_cdmx.csv", &mut celdas, sector)?;
     }
     
     utilities::escribir_topologia(&celdas, "./salida/celdas_agebs.csv")?;
@@ -47,11 +41,11 @@ fn agebs() -> Result<(), Box<dyn Error>> {
     let directorio = "./salida/";
     let mut salida = utilities::get_salida(&sectores, &celdas, directorio)?;
 
-    for _ in 0..ITERACIONES {
+    for t in 0..ITERACIONES {
         {
-        let _t : easytiming::Timing<'_, Stdout>  = Timing::new("test() function");
+        // let _t : easytiming::Timing<'_, Stdout>  = Timing::new("test() function");
         // if t % 50 == 0 {
-        //     println!("t = {}", t)
+            println!("t = {}", t);
         // }
 
         celdas.evolve(&sectores);
