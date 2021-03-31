@@ -85,8 +85,10 @@ fn random_ensamble() -> Result<(), Box<dyn Error>> {
         }).collect();
 
         let sectores = utilities::sectors_from_vec(proto_sectores);
+        let centros = utilities::random_vec_of_cves(CENTROS, & celdas);
+
         for (_, sector) in sectores.iter() {
-            utilities::define_random_centers(CENTROS, &mut celdas, sector);
+            let _ = utilities::centers_from_vec(&centros, 1.0, &mut celdas, &sector);
         }
     
         utilities::escribir_topologia(&celdas, "./salida/ensamble_random/celdas.csv")?;

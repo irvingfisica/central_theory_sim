@@ -99,6 +99,36 @@ pub fn centers_from_file<'a>(path: &str, celdas: &mut HashMap<String,Celda<'a>>,
 
 }
 
+pub fn random_vec_of_cves<'a>(centros: usize, celdas: &HashMap<String,Celda<'a>>) -> Vec<String> {
+    use rand::prelude::*;
+
+    let mut rng = &mut rand::thread_rng();
+
+    let centers = centros.min(celdas.len());
+    let cves = celdas.iter().map(|(cve,_)| cve.to_owned()).choose_multiple(&mut rng, centers);
+
+    cves
+}
+
+pub fn centers_from_vec<'a>(cves: &Vec<String>, size: f64, celdas: &mut HashMap<String,Celda<'a>>, sector: &'a Sector) -> Result<Vec<String>,Box<dyn Error>> {
+
+    let growth_factor = 0.5;
+
+    for cve in cves.iter() {
+
+        match celdas.get_mut(cve) {
+            Some(celda) => {
+                celda.add_activity(sector, size, growth_factor);
+            },
+            None => continue
+        };
+
+    }
+
+    Ok(cves.clone())
+
+}
+
 pub fn define_random_centers<'a>(centros: usize, celdas: &mut HashMap<String,Celda<'a>>, sector: &'a Sector) -> Vec<String> {
     use rand::prelude::*;
 
