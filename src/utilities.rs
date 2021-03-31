@@ -3,11 +3,11 @@ use crate::centros::{Sector, Celda};
 use std::fs::File;
 use std::error::Error;
 
-pub fn sectors_from_vec(sectores: Vec<(&str, f64)>) -> HashMap<String, Sector> {
+pub fn sectors_from_vec(sectores: Vec<(String, f64)>) -> HashMap<String, Sector> {
     let mut mapa = HashMap::new();
 
-    for (sector,eta) in sectores {
-        mapa.insert(String::from(sector),Sector::new(sector, eta));
+    for (sector,eta) in sectores.iter() {
+        mapa.insert(String::from(sector),Sector::new(&sector, *eta));
     };
 
     mapa
