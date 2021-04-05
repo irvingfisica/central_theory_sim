@@ -11,7 +11,7 @@ use centros::Economy;
 
 fn main() {
 
-    if let Err(err) = random_ensamble() {
+    if let Err(err) = random_ensamble_random_topology() {
         println!("{}", err);
         process::exit(1);
     }
@@ -58,14 +58,74 @@ fn agebs() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn random_ensamble() -> Result<(), Box<dyn Error>> {
+fn random_ensamble_random_topology() -> Result<(), Box<dyn Error>> {
 
     const X_MAX: usize = 50;
     const Y_MAX: usize = 50;
     const POBLACION: f64 = 1.0;
     const CENTROS: usize = 20;
     const ITERACIONES: usize = 200;
-    const INSTANCIAS: usize = 10;
+    const INSTANCIAS: usize = 1000;
+
+    for i in 0..INSTANCIAS {
+
+        let istr = (i + 1).to_string();
+        let mut cadena = String::from("i_");
+        cadena.push_str(&istr);
+        cadena.push_str("_e_");
+
+        let proto_sectores: Vec<(String,f64)> = (0..30).map(|ent| {
+            let eta = 0.1 + 0.1 * ent as f64;
+            let streta = format!("{:.1}", eta);
+            let mut cad = cadena.to_owned();
+            cad.push_str(&streta);
+            let salstr = cad.replace(".","p");
+            (salstr,eta)
+        }).collect();
+
+        for (salstr, eta) in proto_sectores.iter() {
+            let mut celdas = utilities::grid_of_cells(X_MAX, Y_MAX, POBLACION);
+            utilities::escribir_topologia(&celdas, "./salida/ensamble_random/celdas.csv")?;
+
+            let proto_sector = vec![(salstr.to_owned(),eta.to_owned())];
+
+            let sectores = utilities::sectors_from_vec(proto_sector);
+            let centros = utilities::random_vec_of_cves(CENTROS, &celdas);
+
+            for (_, sector) in sectores.iter() {
+                let _ = utilities::centers_from_vec(&centros, 1.0, &mut celdas, &sector);
+            }
+
+            let directorio = "./salida/ensamble_random_random/";
+            let mut salida = utilities::get_salida(&sectores, &celdas, directorio)?;
+            
+            for t in 0..ITERACIONES {
+                if t % 50 == 0 {
+                    println!("i = {}, t = {}", i, t)
+                }
+    
+                // println!("i = {}, t = {}", i, t);
+    
+                celdas.evolve(&sectores);
+                utilities::escribir_iteracion(&mut salida, &celdas)?;
+            }
+
+            utilities::flush_salida(&mut salida)?;
+        }
+
+    }
+
+    Ok(())
+}
+
+fn random_ensamble_same_topology() -> Result<(), Box<dyn Error>> {
+
+    const X_MAX: usize = 50;
+    const Y_MAX: usize = 50;
+    const POBLACION: f64 = 1.0;
+    const CENTROS: usize = 20;
+    const ITERACIONES: usize = 200;
+    const INSTANCIAS: usize = 100;
 
     for i in 0..INSTANCIAS {
         let mut celdas = utilities::grid_of_cells(X_MAX, Y_MAX, POBLACION);
@@ -85,7 +145,7 @@ fn random_ensamble() -> Result<(), Box<dyn Error>> {
         }).collect();
 
         let sectores = utilities::sectors_from_vec(proto_sectores);
-        let centros = utilities::random_vec_of_cves(CENTROS, & celdas);
+        let centros = utilities::random_vec_of_cves(CENTROS, &celdas);
 
         for (_, sector) in sectores.iter() {
             let _ = utilities::centers_from_vec(&centros, 1.0, &mut celdas, &sector);
